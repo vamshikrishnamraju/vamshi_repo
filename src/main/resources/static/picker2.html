@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Google Picker Example</title>
+</head>
+<body>
+	<button type="button" id="pick">Pick File</button>
+	<pre id="fileInfo"></pre>
+
+	<script src="filepicker_drive.js"></script>
+	<script>
+		function initPicker() {
+			var picker = new FilePicker({
+				apiKey: 'AIzaSyASKKbEa8teTshLRXS27IzdAJyqAlsSG3U',
+				clientId: '563192586809-6rlvlj55m6u06gusgcv762bvtovtbgju.apps.googleusercontent.com',
+				buttonEl: document.getElementById('pick'),
+				onSelect: function(file) {
+					console.log(file);
+					document.getElementById('fileInfo').innerHTML = file.title + '\n' + file.alternateLink;
+				}
+			});
+		}
+	</script>
+
+	<script src="https://www.google.com/jsapi?key=AIzaSyASKKbEa8teTshLRXS27IzdAJyqAlsSG3U"></script>
+	<script src="https://apis.google.com/js/client.js?onload=initPicker"></script>
+</body>
+</html>

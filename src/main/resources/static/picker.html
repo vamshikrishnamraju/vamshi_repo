@@ -1,113 +1,178 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Google Picker Example</title>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Google Picker Example</title>
 
-    <script type="text/javascript">
+<script type="text/javascript">
+	// The Browser API key obtained from the Google Developers Console.
+	var developerKey = 'AIzaSyAeLQ0gThcE5KP0nl2yBXdRpuJjgN0BmK0';
 
-      // The Browser API key obtained from the Google Developers Console.
-      var developerKey = 'AIzaSyAeLQ0gThcE5KP0nl2yBXdRpuJjgN0BmK0';
+	// The Client ID obtained from the Google Developers Console. Replace with your own Client ID.
+	var clientId = "563192586809-6rlvlj55m6u06gusgcv762bvtovtbgju.apps.googleusercontent.com"
 
-      // The Client ID obtained from the Google Developers Console. Replace with your own Client ID.
-      var clientId = "563192586809-6rlvlj55m6u06gusgcv762bvtovtbgju.apps.googleusercontent.com"
+	// Scope to use to access user's photos.
+	var scope = [ 'https://www.googleapis.com/auth/drive.readonly',
+			'https://www.googleapis.com/auth/drive.metadata.readonly',
+			'https://www.googleapis.com/auth/drive.file',
+			'https://www.googleapis.com/auth/drive.appdata',
+			'https://www.googleapis.com/auth/drive.metadata' ];
 
-      // Scope to use to access user's photos.
-      var scope = ['https://www.googleapis.com/auth/drive.readonly'];
+	var DISCOVERY_DOCS = [ "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest" ];
 
-      var pickerApiLoaded = false;
-      var oauthToken;
+	var pickerApiLoaded = false;
+	var oauthToken;
 
-      // Use the API Loader script to load google.picker and gapi.auth.
-      function onApiLoad() {
-        gapi.load('auth', {'callback': onAuthApiLoad});
-        gapi.load('picker', {'callback': onPickerApiLoad});
-        gapi.load('drive','v2');
-      }
+	// Use the API Loader script to load google.picker and gapi.auth.
+	function onApiLoad() {
+		gapi.load('auth', {
+			'callback' : onAuthApiLoad
+		});
+		gapi.load('picker', {
+			'callback' : onPickerApiLoad
+		});
+	}
 
-      function onAuthApiLoad() {
-        window.gapi.auth.authorize(
-            {
-              'client_id': clientId,
-              'scope': scope,
-              'immediate': false
-            },
-            handleAuthResult);
-      }
+	/**
+	 *  Sign in the user upon button click.
+	 */
+	function handleAuthClick(event) {
+		gapi.auth2.getAuthInstance().signIn();
+	}
 
-      function onPickerApiLoad() {
-        pickerApiLoaded = true;
-        createPicker();
-      }
-      function onDriveApiLoad(){
-    	  console.log("drive app loaded");
-      }
+	/**
+	 *  Sign out the user upon button click.
+	 */
+	function handleSignoutClick(event) {
+		gapi.auth2.getAuthInstance().signOut();
+	}
 
-      function handleAuthResult(authResult) {
-        if (authResult && !authResult.error) {
-          oauthToken = authResult.access_token;
-          createPicker();
-        }
-      }
+	function onAuthApiLoad() {
+		console.log("vamshi");
+		window.gapi.auth.authorize({
+			'client_id' : clientId,
+			'scope' : scope,
+			'immediate' : false
+		}, handleAuthResult);
+	}
 
-      // Create and render a Picker object for picking user Photos.
-      function createPicker() {
-        if (pickerApiLoaded && oauthToken) {
-          var picker = new google.picker.PickerBuilder().
-              addView(google.picker.ViewId.DOCS).
-              setOAuthToken(oauthToken).
-              setDeveloperKey(developerKey).
-              setCallback(pickerCallback).
-              build();
-          picker.setVisible(true);
-        }
-      }
+	function onPickerApiLoad() {
+		pickerApiLoaded = true;
+		createPicker();
+	}
+	function onDriveApiLoad() {
+		console.log("drive app loaded");
+	}
 
-      // A simple callback implementation.
-      function pickerCallback(data) {
-        var url = 'nothing';
-        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
-			console.log("data ="+data);
-          var doc = data[google.picker.Response.DOCUMENTS][0];
-		  	console.log("doc ="+doc);
-          url = doc[google.picker.Document.URL];
-          var fileId = data.docs[0].id;
-          console.log("fileId="+fileId);
-          
-          printFile(fileId);	
-        }
-        var message = 'You picked: ' + url;
-        document.getElementById('result').innerHTML = message;
-      }
-      
-      function printFile(fileId) {
-    	  
-    	  var request = gapi.client.drive.files.get({
-    	    'fileId': fileId
-    	  });
-    	  request.execute(function(resp) {
-    	    console.log('Title: ' + resp.title);
-    	    console.log('Description: ' + resp.description);
-    	    console.log('MIME type: ' + resp.mimeType);
-    	  });
-    	}
-      
-      /**
-       *  On load, called to load the auth2 library and API client library.
-       */
-      function handleClientLoad() {
-        gapi.load('client:auth2', initClient);
-      }
-    </script>
-  </head>
-  <body>
-    <div id="result"></div>
+	function handleAuthResult(authResult) {
+		if (authResult && !authResult.error) {
+			oauthToken = authResult.access_token;
+			createPicker();
+		}
+	}
 
-    <!-- The Google API Loader script. -->
-    <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
-    <script async defer src="https://apis.google.com/js/api.js"
-      onload="this.onload=function(){};handleClientLoad()"
-      onreadystatechange="if (this.readyState === 'complete') this.onload()">
-    </script>
-  </body>
+	// Create and render a Picker object for picking user Photos.
+	function createPicker() {
+		if (pickerApiLoaded && oauthToken) {
+			var picker = new google.picker.PickerBuilder().addView(
+					google.picker.ViewId.DOCS).setOAuthToken(oauthToken)
+					.setDeveloperKey(developerKey).setCallback(pickerCallback)
+					.build();
+			picker.setVisible(true);
+		}
+	}
+
+	// A simple callback implementation.
+	function pickerCallback(data) {
+		var url = 'nothing';
+		if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+			console.log("data =" + data);
+			var doc = data[google.picker.Response.DOCUMENTS][0];
+			console.log("doc =" + doc);
+			url = doc[google.picker.Document.URL];
+			var fileId = data.docs[0].id;
+			console.log("fileId=" + fileId);
+
+			printFile(fileId);
+		}
+		var message = 'You picked: ' + url;
+		document.getElementById('result').innerHTML = message;
+	}
+
+	function printFile(fileId) {
+
+		gapi.client.load('drive', 'v2', null);
+
+		var request = gapi.client.drive.files.get({
+			'fileId' : fileId
+		});
+		request.execute(function(resp) {
+			console.log('Title: ' + resp.title);
+			console.log('Description: ' + resp.description);
+			console.log('MIME type: ' + resp.mimeType);
+		});
+	}
+
+	/**
+	 *  On load, called to load the auth2 library and API client library.
+	 */
+	function handleClientLoad() {
+		gapi.load('client:auth2', initClient);
+	}
+
+	function handleClientLoad() {
+		gapi.load('client:auth2', initClient);
+
+	}
+
+	/**
+	 *  Initializes the API client library and sets up sign-in state
+	 *  listeners.
+	 */
+	function initClient() {
+		gapi.client.init({
+			discoveryDocs : DISCOVERY_DOCS,
+			clientId : clientId,
+			scope : scope
+		}).then(function() {
+			// Listen for sign-in state changes.
+			gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+
+			// Handle the initial sign-in state.
+			updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+			authorizeButton.onclick = handleAuthClick;
+			signoutButton.onclick = handleSignoutClick;
+		});
+	}
+
+	/**
+	 *  Called when the signed in status changes, to update the UI
+	 *  appropriately. After a sign-in, the API is called.
+	 */
+	function updateSigninStatus(isSignedIn) {
+		if (isSignedIn) {
+			authorizeButton.style.display = 'none';
+			signoutButton.style.display = 'block';
+			listFiles();
+		} else {
+			authorizeButton.style.display = 'block';
+			signoutButton.style.display = 'none';
+		}
+	}
+</script>
+</head>
+<body>
+	<div id="result"></div>
+
+	<!-- The Google API Loader script. -->
+	<script type="text/javascript"
+		src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+	<script async defer src="https://apis.google.com/js/api.js"
+		onload="this.onload=function(){};handleClientLoad()"
+		onreadystatechange="if (this.readyState === 'complete') this.onload()">
+		
+	</script>
+	<button id="authorize-button" style="display: none;">Authorize</button>
+	<button id="signout-button" style="display: none;">Sign Out</button>
+</body>
 </html>
